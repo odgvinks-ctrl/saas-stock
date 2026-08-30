@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { creerClientSupabase } from "@/lib/supabase/client";
 import {
   LayoutDashboard, Package, Boxes, ShoppingCart, Store,
   Users, BarChart3, Settings, LogOut
@@ -24,6 +25,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+const supabase = creerClientSupabase();
+
+async function seDeconnecter() {
+  await supabase.auth.signOut();
+  router.push("/login");
+  router.refresh();
+}
 
   return (
     <div className="flex min-h-screen bg-[#161821] text-white/90">
@@ -75,9 +84,12 @@ export default function DashboardLayout({
               <p className="text-[11px] text-white/35">Propriétaire</p>
             </div>
           </div>
-          <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/40 hover:text-[#C1502E] w-full transition">
-            <LogOut size={16} />
-            Déconnexion
+          <button
+              onClick={seDeconnecter}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/40 hover:text-[#C1502E] w-full transition"
+          >
+              <LogOut size={16} />
+              Déconnexion
           </button>
         </div>
       </aside>

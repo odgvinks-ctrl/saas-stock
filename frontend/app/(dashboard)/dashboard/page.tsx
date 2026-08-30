@@ -1,5 +1,6 @@
 "use client";
 
+import { creerClientSupabase } from "@/lib/supabase/client";
 import React, { useState } from "react";
 import {
   Package, TrendingUp, TrendingDown, AlertTriangle, Wallet,
@@ -121,6 +122,16 @@ function KpiCard({ icon: Icon, label, value, sub, tone }: any) {
 }
 
 export default function Dashboard() {
+  const supabase = creerClientSupabase();
+
+React.useEffect(() => {
+  async function testConnexion() {
+    const { data, error } = await supabase.from("boutiques").select("*");
+    console.log("Résultat Supabase :", data);
+    console.log("Erreur éventuelle :", error);
+  }
+  testConnexion();
+}, []);
   const [period, setPeriod] = useState("semaine");
 
   return (
