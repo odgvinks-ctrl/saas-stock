@@ -32,14 +32,12 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(chemin)
   );
 
-  // Pas connecté et essaie d'accéder à une page protégée → redirige vers login
   if (!user && !estCheminPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Déjà connecté et essaie d'accéder à login/register → redirige vers dashboard
   if (user && estCheminPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";

@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { creerClientSupabase } from "@/lib/supabase/client";
 import {
   LayoutDashboard, Package, Boxes, ShoppingCart, Store,
-  Users, BarChart3, Settings, LogOut
+  Users, BarChart3, Settings, LogOut, Bell
 } from "lucide-react";
+import { BoutiqueProvider, useBoutique } from "@/lib/store/boutique-store";
+import { creerClientSupabase } from "@/lib/supabase/client";
 
 const menu = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard },
   { label: "Produits", href: "/produits", icon: Package },
   { label: "Stock", href: "/stock", icon: Boxes },
   { label: "Ventes", href: "/ventes", icon: ShoppingCart },
@@ -19,38 +20,34 @@ const menu = [
   { label: "Paramètres", href: "/parametres", icon: Settings },
 ];
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-const supabase = creerClientSupabase();
+  const { profil } = useBoutique();
+  const nomAffiche = profil.nomProprietaire || "Compléter mon profil";
+  const initiale = profil.nomProprietaire ? profil.nomProprietaire.charAt(0).toUpperCase() : "?";
 
-async function seDeconnecter() {
-  await supabase.auth.signOut();
-  router.push("/login");
-  router.refresh();
-}
+  async function seDeconnecter() {
+    const supabase = creerClientSupabase();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
-    <div className="flex min-h-screen bg-[#161821] text-white/90">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-        .font-serif { font-family: 'Fraunces', serif; }
-        .font-mono { font-family: 'IBM Plex Mono', monospace; }
-      `}</style>
+    <div className="flex min-h-screen bg-slate-950" style={{ fontFamily: "Inter, sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');`}</style>
 
-      {/* Sidebar */}
-      <aside className="w-64 shrink-0 bg-[#1E212C] border-r border-white/5 flex flex-col p-5">
-        <div className="flex items-center gap-2.5 mb-8 px-1">
-          <div className="w-8 h-8 rounded-lg bg-[#E8A33D] flex items-center justify-center">
-            <Package size={16} className="text-[#161821]" />
+      <aside className="w-64 shrink-0 bg-[#0F172A] flex flex-col p-4">
+        <div className="flex items-center gap-2.5 mb-8 px-2 pt-2">
+          <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center">
+            <Package size={18} className="text-white" />
           </div>
           <div>
-            <p className="font-serif text-base text-white/95 leading-none">Boutique+</p>
-            <p className="text-[10px] text-white/35 mt-0.5">Gestion de stock</p>
+            <p className="text-white text-sm font-semibold leading-none">
+              {profil.nomBoutiquePrincipale || "StockFlow"}
+            </p>
+            <p className="text-[11px] text-white/45 mt-1">Gestion de stock</p>
           </div>
         </div>
 
@@ -62,9 +59,7 @@ async function seDeconnecter() {
                 key={href}
                 href={href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-                  isActive
-                    ? "bg-[#E8A33D]/12 text-[#E8A33D]"
-                    : "text-white/50 hover:text-white/85 hover:bg-white/[0.03]"
+                  isActive ? "bg-teal-600 text-white font-medium" : "text-white/55 hover:text-white hover:bg-white/10"
                 }`}
               >
                 <Icon size={17} />
@@ -74,28 +69,42 @@ async function seDeconnecter() {
           })}
         </nav>
 
-        <div className="pt-4 border-t border-white/5">
-          <div className="flex items-center gap-3 px-2 py-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-[#4F9D8D]/20 flex items-center justify-center text-xs font-medium text-[#4F9D8D]">
-              A
+        <div className="pt-4 border-t border-white/15">
+          <Link href="/parametres" className="flex items-center gap-3 px-2 py-2 mb-1 hover:bg-white/5 rounded-lg transition">
+            <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-xs font-medium text-white shrink-0">
+              {initiale}
             </div>
             <div className="min-w-0">
-              <p className="text-sm text-white/85 truncate">Aïcha Traoré</p>
-              <p className="text-[11px] text-white/35">Propriétaire</p>
+              <p className={`text-sm truncate ${profil.nomProprietaire ? "text-white/90" : "text-white/50 italic"}`}>{nomAffiche}</p>
+              <p className="text-[11px] text-white/45">Propriétaire</p>
             </div>
-          </div>
+          </Link>
           <button
-              onClick={seDeconnecter}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/40 hover:text-[#C1502E] w-full transition"
+            onClick={seDeconnecter}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-red-400 hover:bg-white/5 w-full transition"
           >
-              <LogOut size={16} />
-              Déconnexion
+            <LogOut size={16} />
+            Déconnexion
           </button>
         </div>
       </aside>
 
-      {/* Contenu principal */}
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-16 shrink-0 bg-slate-800 border-b border-slate-700 flex items-center justify-end gap-3 px-6">
+          <button className="relative w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center">
+            <Bell size={16} className="text-gray-300" />
+          </button>
+        </header>
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
     </div>
+  );
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <BoutiqueProvider>
+      <DashboardShell>{children}</DashboardShell>
+    </BoutiqueProvider>
   );
 }
