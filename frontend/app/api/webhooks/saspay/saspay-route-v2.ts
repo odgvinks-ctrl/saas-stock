@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ erreur: "Vérification impossible." }, { status: 502 });
   }
 
-  const transaction = await verification.json();
+  const reponseVerif = await verification.json();
+  const transaction = reponseVerif.data ?? reponseVerif;
   const correspondance = /^ABN-(.+)$/.exec(transaction.description ?? "");
   if (!correspondance) {
     // Ce paiement ne correspond pas à un abonnement StockFlow (ignoré sans erreur)

@@ -91,14 +91,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ erreur: "Réponse SasPay invalide.", detail: texteSasPay }, { status: 502 });
     }
 
-    if (!session.checkout_url) {
+    // Certaines réponses SasPay enveloppent les données dans { success, data },
+    // d'autres les renvoient directement à la racine — on gère les deux formats.
+    const donneesSession = session.data ?? session;
+
+    if (!donneesSession.checkout_url) {
       console.error("PAS_DE_CHECKOUT_URL", session);
       return NextResponse.json({ erreur: "Pas d'URL de paiement reçue.", detail: session }, { status: 502 });
     }
 
     const { error: erreurMaj } = await supabase
       .from("abonnements")
-      .update({ checkout_session_id: session.id })
+      .update({ checkout_session_id: donneesSession.id })
       .eq("id", abonnement.id);
 
     if (erreurMaj) {
@@ -106,7 +110,7 @@ export async function POST(request: NextRequest) {
       // On continue quand même : le paiement peut se faire, on perd juste la corrélation facile
     }
 
-    return NextResponse.json({ checkout_url: session.checkout_url });
+    return NextResponse.json({ checkout_url: donneesSession.checkout_url });
   } catch (e: any) {
     console.error("ERREUR_INATTENDUE_CREER_SESSION", e?.message, e?.stack);
     return NextResponse.json({ erreur: "Erreur serveur inattendue.", detail: e?.message ?? String(e) }, { status: 500 });
