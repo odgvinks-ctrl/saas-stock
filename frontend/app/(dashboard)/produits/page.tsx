@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Search, Plus, Package, ChevronDown, X, Check } from "lucide-react";
 import { useBoutique } from "@/lib/store/boutique-store";
 
-const categoriesDisponibles = ["Alimentaire", "Hygiène", "Boissons", "Divers"];
+const categoriesDisponibles = ["Alimentaire", "Hygiène/cosmétiques", "Santé", "Informatique", "Autres"];
 
 function StatutStock({ stock, seuil }: { stock: number; seuil: number }) {
   if (stock <= seuil * 0.3) return <span className="text-xs px-2 py-1 rounded-full bg-red-500/10 text-red-400 font-medium">Critique</span>;

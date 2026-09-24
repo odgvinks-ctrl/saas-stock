@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Package, Boxes, ShoppingCart, Store,
-  Users, BarChart3, Settings, LogOut, Bell
+  Users, BarChart3, Settings, LogOut, Bell, AlertCircle
 } from "lucide-react";
 import { BoutiqueProvider, useBoutique } from "@/lib/store/boutique-store";
 import { creerClientSupabase } from "@/lib/supabase/client";
@@ -14,11 +15,52 @@ const menu = [
   { label: "Produits", href: "/produits", icon: Package },
   { label: "Stock", href: "/stock", icon: Boxes },
   { label: "Ventes", href: "/ventes", icon: ShoppingCart },
-  { label: "Boutiques", href: "/boutiques", icon: Store },
   { label: "Employés", href: "/employes", icon: Users },
   { label: "Rapports", href: "/rapports", icon: BarChart3 },
   { label: "Paramètres", href: "/parametres", icon: Settings },
 ];
+
+function BandeauAbonnement() {
+  const [statut, setStatut] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function verifier() {
+      const supabase = creerClientSupabase();
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+
+      const { data: profil } = await supabase
+        .from("profils")
+        .select("boutique_id")
+        .eq("id", userData.user.id)
+        .single();
+      if (!profil?.boutique_id) return;
+
+      const { data: abonnement } = await supabase
+        .from("abonnements")
+        .select("statut_paiement")
+        .eq("boutique_id", profil.boutique_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      setStatut(abonnement?.statut_paiement ?? null);
+    }
+    verifier();
+  }, []);
+
+  if (statut !== "en_attente") return null;
+
+  return (
+    <div className="bg-amber-500/10 border-b border-amber-500/30 px-6 py-3 flex items-center gap-3">
+      <AlertCircle size={16} className="text-amber-400 shrink-0" />
+      <p className="text-sm text-amber-200">
+        Ton abonnement est en attente de confirmation. Envoie <span className="font-semibold">5 000 F</span> au{" "}
+        <span className="font-semibold">Wave/Orange Money : 70 00 00 00</span> avec le nom de ta boutique en référence — ton accès sera confirmé sous peu.
+      </p>
+    </div>
+  );
+}
 
 function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -90,6 +132,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
+        <BandeauAbonnement />
         <header className="h-16 shrink-0 bg-slate-800 border-b border-slate-700 flex items-center justify-end gap-3 px-6">
           <button className="relative w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center">
             <Bell size={16} className="text-gray-300" />

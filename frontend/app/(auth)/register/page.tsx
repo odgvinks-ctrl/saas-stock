@@ -53,7 +53,7 @@ export default function Register() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/abonnement");
     router.refresh();
   }
 
