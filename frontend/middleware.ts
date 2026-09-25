@@ -52,9 +52,14 @@ export async function middleware(request: NextRequest) {
   if (user && !estCheminPublic && !estExempte) {
     const { data: profil } = await supabase
       .from("profils")
-      .select("boutique_id")
+      .select("boutique_id, est_super_admin")
       .eq("id", user.id)
       .single();
+
+    // Un super-admin a un accès total, sans passer par la vérification d'abonnement
+    if (profil?.est_super_admin) {
+      return response;
+    }
 
     if (profil?.boutique_id) {
       const { data: abonnement } = await supabase
