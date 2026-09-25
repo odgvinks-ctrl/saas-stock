@@ -2,119 +2,80 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-// ------------------------- Types -------------------------
+// ============================================
+// Types
+// ============================================
+export type Profil = {
+  nomProprietaire: string;
+  nomBoutiquePrincipale: string;
+};
 
-export type Categorie =
-  | "Alimentaire"
-  | "Hygiène/cosmétiques"
-  | "Santé"
-  | "Informatique"
-  | "Autres";
-
-export interface Produit {
+export type Produit = {
   id: string;
   nom: string;
-  reference: string;
-  categorie: Categorie;
+  categorie: string;
+  sku: string;
   prixAchat: number;
   prixVente: number;
-  quantite: number;
-  seuilAlerte: number;
-  dateCreation: string;
-}
+  stock: number;
+  seuil: number;
+};
 
-export interface MouvementStock {
+export type Mouvement = {
   id: string;
+  type: "entree" | "sortie" | "transfert";
   produitId: string;
-  type: "entree" | "sortie" | "transfert" | "vente";
+  produitNom: string;
   quantite: number;
-  motif?: string;
+  note?: string;
   date: string;
-}
+};
 
-export interface LigneVente {
+export type LigneVente = {
   produitId: string;
   nom: string;
-  quantite: number;
+  qte: number;
   prixUnitaire: number;
-}
+  prixAchatUnitaire: number;
+};
 
-export interface Vente {
+export type Vente = {
   id: string;
+  date: string;
+  mode: "especes" | "wave" | "orange_money";
   lignes: LigneVente[];
   total: number;
-  modePaiement: "especes" | "wave" | "orange_money";
-  date: string;
-}
+};
 
-export interface Boutique {
+export type Boutique = {
   id: string;
   nom: string;
-  adresse?: string;
-  actif: boolean;
-  dateCreation: string;
-}
+  adresse: string;
+  statut: "actif" | "inactif";
+};
 
-export interface Employe {
+export type Employe = {
   id: string;
   nom: string;
-  role: "gestionnaire" | "vendeur";
-  boutiqueId?: string;
-  dateCreation: string;
-}
+  telephone: string;
+  role: "Gestionnaire" | "Vendeur";
+  boutiqueId: string | null;
+  statut: "actif" | "inactif";
+};
 
-export interface Profil {
-  nomProprietaire: string;
-  nomBoutique: string;
-}
-
-interface BoutiqueContextType {
-  // Profil
-  profil: Profil;
-  mettreAJourProfil: (donnees: Partial<Profil>) => void;
-
-  // Produits
-  produits: Produit[];
-  ajouterProduit: (produit: Omit<Produit, "id" | "dateCreation">) => void;
-  modifierProduit: (id: string, donnees: Partial<Produit>) => void;
-  supprimerProduit: (id: string) => void;
-
-  // Stock
-  mouvements: MouvementStock[];
-  ajouterMouvementStock: (mouvement: Omit<MouvementStock, "id" | "date">) => void;
-
-  // Ventes
-  ventes: Vente[];
-  enregistrerVente: (vente: Omit<Vente, "id" | "date">) => void;
-
-  // Boutiques
-  boutiques: Boutique[];
-  ajouterBoutique: (boutique: Omit<Boutique, "id" | "dateCreation">) => void;
-
-  // Employés
-  employes: Employe[];
-  ajouterEmploye: (employe: Omit<Employe, "id" | "dateCreation">) => void;
-}
-
-const BoutiqueContext = createContext<BoutiqueContextType | undefined>(undefined);
-
-const CLE_STOCKAGE = "stockflow_donnees";
-
-function genererId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-interface DonneesStockees {
+type EtatBoutique = {
   profil: Profil;
   produits: Produit[];
-  mouvements: MouvementStock[];
+  mouvements: Mouvement[];
   ventes: Vente[];
   boutiques: Boutique[];
   employes: Employe[];
-}
+};
 
-const donneesInitiales: DonneesStockees = {
-  profil: { nomProprietaire: "", nomBoutique: "" },
+const CLE_STOCKAGE = "boutique-plus-donnees";
+
+const etatInitial: EtatBoutique = {
+  profil: { nomProprietaire: "", nomBoutiquePrincipale: "" },
   produits: [],
   mouvements: [],
   ventes: [],
@@ -122,172 +83,112 @@ const donneesInitiales: DonneesStockees = {
   employes: [],
 };
 
+// ============================================
+// Contexte
+// ============================================
+type ContexteBoutique = EtatBoutique & {
+  definirProfil: (p: Profil) => void;
+  ajouterProduit: (p: Omit<Produit, "id">) => void;
+  ajouterMouvement: (type: Mouvement["type"], produitId: string, quantite: number, note?: string) => void;
+  enregistrerVente: (lignes: { produitId: string; qte: number }[], mode: Vente["mode"]) => void;
+  ajouterBoutique: (b: Omit<Boutique, "id">) => void;
+  ajouterEmploye: (e: Omit<Employe, "id">) => void;
+};
+
+const Contexte = createContext<ContexteBoutique | null>(null);
+
+function genererId() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
 export function BoutiqueProvider({ children }: { children: React.ReactNode }) {
-  const [profil, setProfil] = useState<Profil>(donneesInitiales.profil);
-  const [produits, setProduits] = useState<Produit[]>(donneesInitiales.produits);
-  const [mouvements, setMouvements] = useState<MouvementStock[]>(donneesInitiales.mouvements);
-  const [ventes, setVentes] = useState<Vente[]>(donneesInitiales.ventes);
-  const [boutiques, setBoutiques] = useState<Boutique[]>(donneesInitiales.boutiques);
-  const [employes, setEmployes] = useState<Employe[]>(donneesInitiales.employes);
+  const [etat, setEtat] = useState<EtatBoutique>(etatInitial);
   const [charge, setCharge] = useState(false);
 
-  // Chargement initial depuis localStorage
   useEffect(() => {
     try {
-      const brut = window.localStorage.getItem(CLE_STOCKAGE);
-      if (brut) {
-        const donnees: DonneesStockees = JSON.parse(brut);
-        setProfil(donnees.profil ?? donneesInitiales.profil);
-        setProduits(donnees.produits ?? []);
-        setMouvements(donnees.mouvements ?? []);
-        setVentes(donnees.ventes ?? []);
-        setBoutiques(donnees.boutiques ?? []);
-        setEmployes(donnees.employes ?? []);
-      }
-    } catch (erreur) {
-      console.error("Erreur de lecture du stockage local :", erreur);
+      const sauvegarde = localStorage.getItem(CLE_STOCKAGE);
+      if (sauvegarde) setEtat({ ...etatInitial, ...JSON.parse(sauvegarde) });
+    } catch {
+      // ignoré
     } finally {
       setCharge(true);
     }
   }, []);
 
-  // Sauvegarde automatique à chaque changement
   useEffect(() => {
-    if (!charge) return; // évite d'écraser avec les valeurs vides avant le chargement
-    const donnees: DonneesStockees = { profil, produits, mouvements, ventes, boutiques, employes };
+    if (!charge) return;
     try {
-      window.localStorage.setItem(CLE_STOCKAGE, JSON.stringify(donnees));
-    } catch (erreur) {
-      console.error("Erreur d'écriture du stockage local :", erreur);
+      localStorage.setItem(CLE_STOCKAGE, JSON.stringify(etat));
+    } catch {
+      // ignoré
     }
-  }, [profil, produits, mouvements, ventes, boutiques, employes, charge]);
+  }, [etat, charge]);
 
-  // ---------------------- Profil ----------------------
-  function mettreAJourProfil(donnees: Partial<Profil>) {
-    setProfil((prev) => ({ ...prev, ...donnees }));
+  function definirProfil(p: Profil) {
+    setEtat((prev) => ({ ...prev, profil: p }));
   }
 
-  // ---------------------- Produits ----------------------
-  function ajouterProduit(produit: Omit<Produit, "id" | "dateCreation">) {
-    const nouveau: Produit = {
-      ...produit,
-      id: genererId(),
-      dateCreation: new Date().toISOString(),
-    };
-    setProduits((prev) => [...prev, nouveau]);
+  function ajouterProduit(p: Omit<Produit, "id">) {
+    setEtat((prev) => ({ ...prev, produits: [...prev.produits, { ...p, id: genererId() }] }));
   }
 
-  function modifierProduit(id: string, donnees: Partial<Produit>) {
-    setProduits((prev) => prev.map((p) => (p.id === id ? { ...p, ...donnees } : p)));
+  function ajouterMouvement(type: Mouvement["type"], produitId: string, quantite: number, note?: string) {
+    setEtat((prev) => {
+      const produit = prev.produits.find((p) => p.id === produitId);
+      if (!produit) return prev;
+      const delta = type === "entree" ? quantite : -quantite;
+      const produitsMisAJour = prev.produits.map((p) =>
+        p.id === produitId ? { ...p, stock: Math.max(0, p.stock + delta) } : p
+      );
+      const mouvement: Mouvement = {
+        id: genererId(), type, produitId, produitNom: produit.nom, quantite, note, date: new Date().toISOString(),
+      };
+      return { ...prev, produits: produitsMisAJour, mouvements: [mouvement, ...prev.mouvements] };
+    });
   }
 
-  function supprimerProduit(id: string) {
-    setProduits((prev) => prev.filter((p) => p.id !== id));
-    // On retire aussi l'historique de stock lié à ce produit, pour rester cohérent
-    setMouvements((prev) => prev.filter((m) => m.produitId !== id));
+  function enregistrerVente(lignes: { produitId: string; qte: number }[], mode: Vente["mode"]) {
+    setEtat((prev) => {
+      const lignesCompletes: LigneVente[] = lignes.map(({ produitId, qte }) => {
+        const produit = prev.produits.find((p) => p.id === produitId)!;
+        return { produitId, nom: produit.nom, qte, prixUnitaire: produit.prixVente, prixAchatUnitaire: produit.prixAchat };
+      });
+      const total = lignesCompletes.reduce((acc, l) => acc + l.prixUnitaire * l.qte, 0);
+      const produitsMisAJour = prev.produits.map((p) => {
+        const ligne = lignesCompletes.find((l) => l.produitId === p.id);
+        return ligne ? { ...p, stock: Math.max(0, p.stock - ligne.qte) } : p;
+      });
+      const nouveauxMouvements: Mouvement[] = lignesCompletes.map((l) => ({
+        id: genererId(), type: "sortie", produitId: l.produitId, produitNom: l.nom, quantite: l.qte, note: "Vente", date: new Date().toISOString(),
+      }));
+      const vente: Vente = { id: genererId(), date: new Date().toISOString(), mode, lignes: lignesCompletes, total };
+      return {
+        ...prev,
+        produits: produitsMisAJour,
+        mouvements: [...nouveauxMouvements, ...prev.mouvements],
+        ventes: [vente, ...prev.ventes],
+      };
+    });
   }
 
-  // ---------------------- Stock ----------------------
-  function ajouterMouvementStock(mouvement: Omit<MouvementStock, "id" | "date">) {
-    const nouveau: MouvementStock = {
-      ...mouvement,
-      id: genererId(),
-      date: new Date().toISOString(),
-    };
-    setMouvements((prev) => [nouveau, ...prev]);
-
-    setProduits((prev) =>
-      prev.map((p) => {
-        if (p.id !== mouvement.produitId) return p;
-        const delta =
-          mouvement.type === "entree"
-            ? mouvement.quantite
-            : -mouvement.quantite;
-        return { ...p, quantite: Math.max(0, p.quantite + delta) };
-      })
-    );
+  function ajouterBoutique(b: Omit<Boutique, "id">) {
+    setEtat((prev) => ({ ...prev, boutiques: [...prev.boutiques, { ...b, id: genererId() }] }));
   }
 
-  // ---------------------- Ventes ----------------------
-  function enregistrerVente(vente: Omit<Vente, "id" | "date">) {
-    const nouvelle: Vente = {
-      ...vente,
-      id: genererId(),
-      date: new Date().toISOString(),
-    };
-    setVentes((prev) => [nouvelle, ...prev]);
-
-    // Décrémente le stock de chaque produit vendu
-    setProduits((prev) =>
-      prev.map((p) => {
-        const ligne = vente.lignes.find((l) => l.produitId === p.id);
-        if (!ligne) return p;
-        return { ...p, quantite: Math.max(0, p.quantite - ligne.quantite) };
-      })
-    );
-
-    // Trace un mouvement de sortie pour chaque ligne vendue
-    setMouvements((prev) => [
-      ...vente.lignes.map((l) => ({
-        id: genererId(),
-        produitId: l.produitId,
-        type: "vente" as const,
-        quantite: l.quantite,
-        motif: "Vente",
-        date: new Date().toISOString(),
-      })),
-      ...prev,
-    ]);
-  }
-
-  // ---------------------- Boutiques ----------------------
-  function ajouterBoutique(boutique: Omit<Boutique, "id" | "dateCreation">) {
-    const nouvelle: Boutique = {
-      ...boutique,
-      id: genererId(),
-      dateCreation: new Date().toISOString(),
-    };
-    setBoutiques((prev) => [...prev, nouvelle]);
-  }
-
-  // ---------------------- Employés ----------------------
-  function ajouterEmploye(employe: Omit<Employe, "id" | "dateCreation">) {
-    const nouveau: Employe = {
-      ...employe,
-      id: genererId(),
-      dateCreation: new Date().toISOString(),
-    };
-    setEmployes((prev) => [...prev, nouveau]);
+  function ajouterEmploye(e: Omit<Employe, "id">) {
+    setEtat((prev) => ({ ...prev, employes: [...prev.employes, { ...e, id: genererId() }] }));
   }
 
   return (
-    <BoutiqueContext.Provider
-      value={{
-        profil,
-        mettreAJourProfil,
-        produits,
-        ajouterProduit,
-        modifierProduit,
-        supprimerProduit,
-        mouvements,
-        ajouterMouvementStock,
-        ventes,
-        enregistrerVente,
-        boutiques,
-        ajouterBoutique,
-        employes,
-        ajouterEmploye,
-      }}
-    >
+    <Contexte.Provider value={{ ...etat, definirProfil, ajouterProduit, ajouterMouvement, enregistrerVente, ajouterBoutique, ajouterEmploye }}>
       {children}
-    </BoutiqueContext.Provider>
+    </Contexte.Provider>
   );
 }
 
 export function useBoutique() {
-  const contexte = useContext(BoutiqueContext);
-  if (!contexte) {
-    throw new Error("useBoutique doit être utilisé à l'intérieur d'un BoutiqueProvider");
-  }
-  return contexte;
+  const ctx = useContext(Contexte);
+  if (!ctx) throw new Error("useBoutique doit être utilisé à l'intérieur de <BoutiqueProvider>");
+  return ctx;
 }
