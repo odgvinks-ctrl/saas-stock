@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Plus, Package, ChevronDown, X, Check } from "lucide-react";
+import { Search, Plus, Package, ChevronDown, X, Check, Trash2, AlertTriangle } from "lucide-react";
 import { useBoutique } from "@/lib/store/boutique-store";
 
 const categoriesDisponibles = ["Alimentaire", "Hygiène/cosmétiques", "Santé", "Informatique", "Autres"];
@@ -93,8 +93,33 @@ function ModalNouveauProduit({ onClose }: { onClose: () => void }) {
   );
 }
 
+function ModalConfirmationSuppression({ nomProduit, onConfirmer, onClose }: { nomProduit: string; onConfirmer: () => void; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm p-6">
+        <div className="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center mb-4">
+          <AlertTriangle size={20} className="text-red-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-white mb-2">Supprimer ce produit ?</h3>
+        <p className="text-sm text-slate-400 mb-6">
+          « {nomProduit} » sera définitivement supprimé de ton catalogue. Cette action est irréversible.
+        </p>
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-slate-600 text-sm text-gray-300 font-medium">
+            Annuler
+          </button>
+          <button onClick={onConfirmer} className="flex-1 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-500 transition">
+            Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Produits() {
-  const { produits } = useBoutique();
+  const { produits, supprimerProduit } = useBoutique();
+  const [produitASupprimer, setProduitASupprimer] = useState<{ id: string; nom: string } | null>(null);
   const [categorieActive, setCategorieActive] = useState("Toutes");
   const [modalOuvert, setModalOuvert] = useState(false);
   const [recherche, setRecherche] = useState("");
@@ -181,7 +206,8 @@ export default function Produits() {
               <div className="col-span-2">Prix vente</div>
               <div className="col-span-1">Marge</div>
               <div className="col-span-1">Stock</div>
-              <div className="col-span-2">Statut</div>
+              <div className="col-span-1">Statut</div>
+              <div className="col-span-1"></div>
             </div>
             {produitsFiltres.map((p) => {
               const marge = p.prixVente > 0 ? Math.round(((p.prixVente - p.prixAchat) / p.prixVente) * 100) : 0;
@@ -200,7 +226,16 @@ export default function Produits() {
                   <div className="col-span-2 text-sm text-gray-300">{p.prixVente.toLocaleString("fr-FR")} F</div>
                   <div className="col-span-1 text-sm font-medium text-teal-400">{marge}%</div>
                   <div className="col-span-1 text-sm font-medium text-white">{p.stock}</div>
-                  <div className="col-span-2"><StatutStock stock={p.stock} seuil={p.seuil} /></div>
+                  <div className="col-span-1"><StatutStock stock={p.stock} seuil={p.seuil} /></div>
+                  <div className="col-span-1 flex justify-end">
+                    <button
+                      onClick={() => setProduitASupprimer({ id: p.id, nom: p.nom })}
+                      className="text-slate-500 hover:text-red-400 transition p-1.5 rounded-lg hover:bg-red-500/10"
+                      title="Supprimer ce produit"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -209,6 +244,17 @@ export default function Produits() {
       </div>
 
       {modalOuvert && <ModalNouveauProduit onClose={() => setModalOuvert(false)} />}
+
+      {produitASupprimer && (
+        <ModalConfirmationSuppression
+          nomProduit={produitASupprimer.nom}
+          onClose={() => setProduitASupprimer(null)}
+          onConfirmer={() => {
+            supprimerProduit(produitASupprimer.id);
+            setProduitASupprimer(null);
+          }}
+        />
+      )}
     </div>
   );
 }

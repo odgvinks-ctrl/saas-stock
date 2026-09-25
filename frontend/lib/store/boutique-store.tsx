@@ -89,6 +89,7 @@ const etatInitial: EtatBoutique = {
 type ContexteBoutique = EtatBoutique & {
   definirProfil: (p: Profil) => void;
   ajouterProduit: (p: Omit<Produit, "id">) => void;
+  supprimerProduit: (id: string) => void;
   ajouterMouvement: (type: Mouvement["type"], produitId: string, quantite: number, note?: string) => void;
   enregistrerVente: (lignes: { produitId: string; qte: number }[], mode: Vente["mode"]) => void;
   ajouterBoutique: (b: Omit<Boutique, "id">) => void;
@@ -131,6 +132,13 @@ export function BoutiqueProvider({ children }: { children: React.ReactNode }) {
 
   function ajouterProduit(p: Omit<Produit, "id">) {
     setEtat((prev) => ({ ...prev, produits: [...prev.produits, { ...p, id: genererId() }] }));
+  }
+
+  function supprimerProduit(id: string) {
+    setEtat((prev) => ({
+      ...prev,
+      produits: prev.produits.filter((p) => p.id !== id),
+    }));
   }
 
   function ajouterMouvement(type: Mouvement["type"], produitId: string, quantite: number, note?: string) {
@@ -181,7 +189,7 @@ export function BoutiqueProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <Contexte.Provider value={{ ...etat, definirProfil, ajouterProduit, ajouterMouvement, enregistrerVente, ajouterBoutique, ajouterEmploye }}>
+    <Contexte.Provider value={{ ...etat, definirProfil, ajouterProduit, supprimerProduit, ajouterMouvement, enregistrerVente, ajouterBoutique, ajouterEmploye }}>
       {children}
     </Contexte.Provider>
   );
