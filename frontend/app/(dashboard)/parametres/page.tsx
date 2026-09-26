@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { User, Bell, CreditCard, Store, Check } from "lucide-react";
+import { useEffect } from "react";
+import { User, Bell, CreditCard, Store, Check, Loader2 } from "lucide-react";
 import { useBoutique } from "@/lib/store/boutique-store";
+import { creerClientSupabase } from "@/lib/supabase/client";
 
 const onglets = [
   { id: "general", label: "Général", icon: Store },
@@ -27,6 +29,36 @@ export default function Parametres() {
   const [nomBoutique, setNomBoutique] = useState(profil.nomBoutiquePrincipale);
   const [nomProprietaire, setNomProprietaire] = useState(profil.nomProprietaire);
   const [enregistre, setEnregistre] = useState(false);
+
+  const [abonnement, setAbonnement] = useState<{ plan: string; montant: number; date_fin: string; statut_paiement: string } | null>(null);
+  const [chargementAbo, setChargementAbo] = useState(true);
+
+  useEffect(() => {
+    async function charger() {
+      const supabase = creerClientSupabase();
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) { setChargementAbo(false); return; }
+
+      const { data: profilSupabase } = await supabase
+        .from("profils")
+        .select("boutique_id")
+        .eq("id", userData.user.id)
+        .single();
+      if (!profilSupabase?.boutique_id) { setChargementAbo(false); return; }
+
+      const { data: abo } = await supabase
+        .from("abonnements")
+        .select("plan, montant, date_fin, statut_paiement")
+        .eq("boutique_id", profilSupabase.boutique_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      setAbonnement(abo);
+      setChargementAbo(false);
+    }
+    charger();
+  }, []);
 
   function sauvegarderGeneral() {
     definirProfil({ ...profil, nomBoutiquePrincipale: nomBoutique });
@@ -126,14 +158,43 @@ export default function Parametres() {
           {ongletActif === "abonnement" && (
             <div>
               <h3 className="text-base font-semibold text-white mb-4">Ton abonnement</h3>
-              <div className="rounded-xl bg-teal-500/10 border border-teal-500/40 p-5 mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-gray-100">Plan Solo</p>
-                  <span className="text-xs px-2 py-1 rounded-full bg-teal-500/20 text-teal-400 font-medium">Actif</span>
+
+              {chargementAbo ? (
+                <div className="flex items-center gap-2 text-sm text-slate-400 py-6">
+                  <Loader2 size={15} className="animate-spin" /> Chargement...
                 </div>
-                <p className="text-2xl font-bold text-white mb-1">5 000 F<span className="text-sm font-normal text-slate-500">/mois</span></p>
-              </div>
-              <button className="text-sm text-teal-400 border border-teal-500/50 px-4 py-2 rounded-lg font-medium">Changer de plan</button>
+              ) : !abonnement ? (
+                <p className="text-sm text-slate-400 mb-4">Aucun abonnement trouvé.</p>
+              ) : (
+                <div className={`rounded-xl p-5 mb-4 border ${
+                  abonnement.statut_paiement === "paye"
+                    ? "bg-teal-500/10 border-teal-500/40"
+                    : "bg-amber-500/10 border-amber-500/40"
+                }`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-gray-100 capitalize">Plan {abonnement.plan}</p>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      abonnement.statut_paiement === "paye" ? "bg-teal-500/20 text-teal-400" : "bg-amber-500/20 text-amber-400"
+                    }`}>
+                      {abonnement.statut_paiement === "paye" ? "Actif" : "En attente"}
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-white mb-1">
+                    {abonnement.montant.toLocaleString("fr-FR")} F
+                    <span className="text-sm font-normal text-slate-500">{abonnement.plan === "annuel" ? "/an" : "/mois"}</span>
+                  </p>
+                  {abonnement.date_fin && (
+                    <p className="text-xs text-slate-500">
+                      {abonnement.statut_paiement === "paye" ? "Renouvellement" : "Expire"} le{" "}
+                      {new Date(abonnement.date_fin).toLocaleDateString("fr-FR")}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <a href="/abonnement" className="inline-block text-sm text-teal-400 border border-teal-500/50 px-4 py-2 rounded-lg font-medium hover:bg-slate-700 transition">
+                Changer de plan
+              </a>
             </div>
           )}
         </div>
