@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Package, Boxes, ShoppingCart, Store,
-  Users, BarChart3, Settings, LogOut, Bell
+  Users, BarChart3, Settings, LogOut, Bell, Clock
 } from "lucide-react";
 import { BoutiqueProvider, useBoutique } from "@/lib/store/boutique-store";
 import { creerClientSupabase } from "@/lib/supabase/client";
@@ -19,6 +20,62 @@ const menu = [
   { label: "Rapports", href: "/rapports", icon: BarChart3 },
   { label: "Paramètres", href: "/parametres", icon: Settings },
 ];
+
+function DecompteAbonnement() {
+  const [joursRestants, setJoursRestants] = useState<number | null>(null);
+  const [estSuperAdmin, setEstSuperAdmin] = useState(false);
+
+  useEffect(() => {
+    async function charger() {
+      const supabase = creerClientSupabase();
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+
+      const { data: profilSupabase } = await supabase
+        .from("profils")
+        .select("boutique_id, est_super_admin")
+        .eq("id", userData.user.id)
+        .single();
+
+      if (profilSupabase?.est_super_admin) {
+        setEstSuperAdmin(true);
+        return;
+      }
+      if (!profilSupabase?.boutique_id) return;
+
+      const { data: abonnement } = await supabase
+        .from("abonnements")
+        .select("date_fin, statut_paiement")
+        .eq("boutique_id", profilSupabase.boutique_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (abonnement?.statut_paiement === "paye" && abonnement.date_fin) {
+        const fin = new Date(abonnement.date_fin).getTime();
+        const maintenant = new Date().setHours(0, 0, 0, 0);
+        const jours = Math.ceil((fin - maintenant) / (1000 * 60 * 60 * 24));
+        setJoursRestants(jours);
+      }
+    }
+    charger();
+  }, []);
+
+  if (estSuperAdmin || joursRestants === null) return null;
+
+  const urgent = joursRestants <= 7;
+
+  return (
+    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+      urgent ? "bg-amber-500/10 text-amber-400" : "bg-slate-700 text-slate-300"
+    }`}>
+      <Clock size={13} />
+      {joursRestants > 0
+        ? `${joursRestants} jour${joursRestants > 1 ? "s" : ""} restant${joursRestants > 1 ? "s" : ""}`
+        : "Expire aujourd'hui"}
+    </div>
+  );
+}
 
 function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -91,6 +148,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 shrink-0 bg-slate-800 border-b border-slate-700 flex items-center justify-end gap-3 px-6">
+          <DecompteAbonnement />
           <button className="relative w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center">
             <Bell size={16} className="text-gray-300" />
           </button>
