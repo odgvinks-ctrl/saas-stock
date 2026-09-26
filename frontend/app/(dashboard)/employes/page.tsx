@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, X, Check, MoreVertical, Shield, Users } from "lucide-react";
+import { Plus, X, Check, Shield, Users, Trash2, AlertTriangle } from "lucide-react";
 import { useBoutique } from "@/lib/store/boutique-store";
 
 const permissions: Record<string, string[]> = {
@@ -69,9 +69,34 @@ function ModalNouvelEmploye({ onClose }: { onClose: () => void }) {
   );
 }
 
+function ModalConfirmationSuppression({ nomEmploye, onConfirmer, onClose }: { nomEmploye: string; onConfirmer: () => void; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm p-6">
+        <div className="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center mb-4">
+          <AlertTriangle size={20} className="text-red-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-white mb-2">Retirer cet employé ?</h3>
+        <p className="text-sm text-slate-400 mb-6">
+          « {nomEmploye} » perdra immédiatement l'accès à la boutique. Cette action est irréversible.
+        </p>
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-slate-600 text-sm text-gray-300 font-medium">
+            Annuler
+          </button>
+          <button onClick={onConfirmer} className="flex-1 py-2.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-500 transition">
+            Retirer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Employes() {
-  const { employes, boutiques } = useBoutique();
+  const { employes, boutiques, supprimerEmploye } = useBoutique();
   const [modal, setModal] = useState(false);
+  const [employeASupprimer, setEmployeASupprimer] = useState<{ id: string; nom: string } | null>(null);
 
   const nomBoutique = (id: string | null) => boutiques.find((b) => b.id === id)?.nom ?? "—";
 
@@ -124,7 +149,15 @@ export default function Employes() {
                 <div className="col-span-2">
                   <span className="text-xs px-2 py-1 rounded-full font-medium bg-teal-500/10 text-teal-400">Actif</span>
                 </div>
-                <div className="col-span-1 flex justify-end"><button className="text-slate-500 hover:text-gray-300"><MoreVertical size={16} /></button></div>
+                <div className="col-span-1 flex justify-end">
+                  <button
+                    onClick={() => setEmployeASupprimer({ id: e.id, nom: e.nom })}
+                    className="text-slate-500 hover:text-red-400 transition p-1.5 rounded-lg hover:bg-red-500/10"
+                    title="Retirer cet employé"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
               </div>
             ))}
           </>
@@ -153,6 +186,17 @@ export default function Employes() {
       </div>
 
       {modal && <ModalNouvelEmploye onClose={() => setModal(false)} />}
+
+      {employeASupprimer && (
+        <ModalConfirmationSuppression
+          nomEmploye={employeASupprimer.nom}
+          onClose={() => setEmployeASupprimer(null)}
+          onConfirmer={() => {
+            supprimerEmploye(employeASupprimer.id);
+            setEmployeASupprimer(null);
+          }}
+        />
+      )}
     </div>
   );
 }
