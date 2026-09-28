@@ -37,8 +37,8 @@ function ModalNouveauProduit({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg p-5 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white">Nouveau produit</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-gray-300"><X size={18} /></button>
@@ -136,13 +136,13 @@ export default function Produits() {
   const enAlerte = produits.filter((p) => p.stock <= p.seuil).length;
 
   return (
-    <div className="p-6 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Produits</h1>
-          <p className="text-sm text-slate-500 mt-1">Vue d'ensemble de tous les articles en vente.</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-white">Produits</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">Vue d'ensemble de tous les articles en vente.</p>
         </div>
-        <button onClick={() => setModalOuvert(true)} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium">
+        <button onClick={() => setModalOuvert(true)} className="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto transition">
           <Plus size={16} /> Ajouter un produit
         </button>
       </div>
@@ -199,52 +199,50 @@ export default function Produits() {
             </button>
           </div>
         ) : (
-          <>
-<div className="overflow-x-auto">
-<div className="min-w-[700px]">
-            <div className="grid grid-cols-12 px-6 py-3 border-b border-slate-700 text-xs uppercase tracking-wider text-gray-500 font-medium">
-              <div className="col-span-4">Produit</div>
-              <div className="col-span-2">Prix achat</div>
-              <div className="col-span-2">Prix vente</div>
-              <div className="col-span-1">Marge</div>
-              <div className="col-span-1">Stock</div>
-              <div className="col-span-1">Statut</div>
-              <div className="col-span-1"></div>
+          <div className="overflow-x-auto">
+            <div className="min-w-[700px]">
+              <div className="grid grid-cols-12 px-6 py-3 border-b border-slate-700 text-xs uppercase tracking-wider text-gray-500 font-medium">
+                <div className="col-span-4">Produit</div>
+                <div className="col-span-2">Prix achat</div>
+                <div className="col-span-2">Prix vente</div>
+                <div className="col-span-1">Marge</div>
+                <div className="col-span-1">Stock</div>
+                <div className="col-span-1">Statut</div>
+                <div className="col-span-1"></div>
+              </div>
+              {produitsFiltres.map((p) => {
+                const marge = p.prixVente > 0 ? Math.round(((p.prixVente - p.prixAchat) / p.prixVente) * 100) : 0;
+                return (
+                  <div key={p.id} className="grid grid-cols-12 items-center px-6 py-3.5 border-b border-slate-700 last:border-0 hover:bg-slate-900">
+                    <div className="col-span-4 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-slate-700 border border-slate-700 flex items-center justify-center shrink-0">
+                        <Package size={15} className="text-gray-500" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm text-white truncate font-medium">{p.nom}</p>
+                        <p className="text-xs text-gray-500">{p.sku} · {p.categorie}</p>
+                      </div>
+                    </div>
+                    <div className="col-span-2 text-sm text-gray-300">{p.prixAchat.toLocaleString("fr-FR")} F</div>
+                    <div className="col-span-2 text-sm text-gray-300">{p.prixVente.toLocaleString("fr-FR")} F</div>
+                    <div className="col-span-1 text-sm font-medium text-teal-400">{marge}%</div>
+                    <div className="col-span-1 text-sm font-medium text-white">{p.stock}</div>
+                    <div className="col-span-1"><StatutStock stock={p.stock} seuil={p.seuil} /></div>
+                    <div className="col-span-1 flex justify-end">
+                      <button
+                        onClick={() => setProduitASupprimer({ id: p.id, nom: p.nom })}
+                        className="text-slate-500 hover:text-red-400 transition p-1.5 rounded-lg hover:bg-red-500/10"
+                        title="Supprimer ce produit"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            {produitsFiltres.map((p) => {
-              const marge = p.prixVente > 0 ? Math.round(((p.prixVente - p.prixAchat) / p.prixVente) * 100) : 0;
-              return (
-                <div key={p.id} className="grid grid-cols-12 items-center px-6 py-3.5 border-b border-slate-700 last:border-0 hover:bg-slate-900">
-                  <div className="col-span-4 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-slate-700 border border-slate-700 flex items-center justify-center shrink-0">
-                      <Package size={15} className="text-gray-500" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm text-white truncate font-medium">{p.nom}</p>
-                      <p className="text-xs text-gray-500">{p.sku} · {p.categorie}</p>
-                    </div>
-                  </div>
-                  <div className="col-span-2 text-sm text-gray-300">{p.prixAchat.toLocaleString("fr-FR")} F</div>
-                  <div className="col-span-2 text-sm text-gray-300">{p.prixVente.toLocaleString("fr-FR")} F</div>
-                  <div className="col-span-1 text-sm font-medium text-teal-400">{marge}%</div>
-                  <div className="col-span-1 text-sm font-medium text-white">{p.stock}</div>
-                  <div className="col-span-1"><StatutStock stock={p.stock} seuil={p.seuil} /></div>
-                  <div className="col-span-1 flex justify-end">
-                    <button
-                      onClick={() => setProduitASupprimer({ id: p.id, nom: p.nom })}
-                      className="text-slate-500 hover:text-red-400 transition p-1.5 rounded-lg hover:bg-red-500/10"
-                      title="Supprimer ce produit"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </>
+          </div>
         )}
-</div>
-</div>
       </div>
 
       {modalOuvert && <ModalNouveauProduit onClose={() => setModalOuvert(false)} />}

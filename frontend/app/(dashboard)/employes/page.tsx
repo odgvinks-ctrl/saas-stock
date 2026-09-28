@@ -23,8 +23,8 @@ function ModalNouvelEmploye({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-2xl w-full max-w-md p-6 shadow-xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white">Nouvel employé</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-gray-300"><X size={18} /></button>
@@ -101,13 +101,13 @@ export default function Employes() {
   const nomBoutique = (id: string | null) => boutiques.find((b) => b.id === id)?.nom ?? "—";
 
   return (
-    <div className="p-6 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Employés</h1>
-          <p className="text-sm text-slate-500 mt-1">{employes.length} compte(s) créé(s).</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-white">Employés</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">{employes.length} compte(s) créé(s).</p>
         </div>
-        <button onClick={() => setModal(true)} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium">
+        <button onClick={() => setModal(true)} className="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto transition">
           <Plus size={16} /> Nouvel employé
         </button>
       </div>
@@ -125,46 +125,44 @@ export default function Employes() {
             </button>
           </div>
         ) : (
-          <>
-<div className="overflow-x-auto">
-<div className="min-w-[700px]">
-            <div className="grid grid-cols-12 px-6 py-3 border-b border-slate-700 text-xs uppercase tracking-wider text-gray-500 font-medium">
-              <div className="col-span-4">Employé</div>
-              <div className="col-span-2">Rôle</div>
-              <div className="col-span-3">Boutique</div>
-              <div className="col-span-2">Statut</div>
-              <div className="col-span-1"></div>
-            </div>
-            {employes.map((e) => (
-              <div key={e.id} className="grid grid-cols-12 items-center px-6 py-3.5 border-b border-slate-700 last:border-0 hover:bg-slate-900">
-                <div className="col-span-4 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-teal-500/10 flex items-center justify-center text-xs font-semibold text-teal-400 shrink-0">
-                    {e.nom.charAt(0).toUpperCase()}
-                  </div>
-                  <p className="text-sm text-white font-medium truncate">{e.nom}</p>
-                </div>
-                <div className="col-span-2 flex items-center gap-1.5">
-                  {e.role === "Gestionnaire" && <Shield size={13} className="text-teal-400" />}
-                  <p className="text-sm text-gray-300">{e.role}</p>
-                </div>
-                <div className="col-span-3"><p className="text-sm text-gray-300">{nomBoutique(e.boutiqueId)}</p></div>
-                <div className="col-span-2">
-                  <span className="text-xs px-2 py-1 rounded-full font-medium bg-teal-500/10 text-teal-400">Actif</span>
-                </div>
-                <div className="col-span-1 flex justify-end">
-                  <button
-                    onClick={() => setEmployeASupprimer({ id: e.id, nom: e.nom })}
-                    className="text-slate-500 hover:text-red-400 transition p-1.5 rounded-lg hover:bg-red-500/10"
-                    title="Retirer cet employé"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
+          <div className="overflow-x-auto">
+            <div className="min-w-[700px]">
+              <div className="grid grid-cols-12 px-6 py-3 border-b border-slate-700 text-xs uppercase tracking-wider text-gray-500 font-medium">
+                <div className="col-span-4">Employé</div>
+                <div className="col-span-2">Rôle</div>
+                <div className="col-span-3">Boutique</div>
+                <div className="col-span-2">Statut</div>
+                <div className="col-span-1"></div>
               </div>
-            ))}
-          </>
-</div>
-</div>
+              {employes.map((e) => (
+                <div key={e.id} className="grid grid-cols-12 items-center px-6 py-3.5 border-b border-slate-700 last:border-0 hover:bg-slate-900">
+                  <div className="col-span-4 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-teal-500/10 flex items-center justify-center text-xs font-semibold text-teal-400 shrink-0">
+                      {e.nom.charAt(0).toUpperCase()}
+                    </div>
+                    <p className="text-sm text-white font-medium truncate">{e.nom}</p>
+                  </div>
+                  <div className="col-span-2 flex items-center gap-1.5">
+                    {e.role === "Gestionnaire" && <Shield size={13} className="text-teal-400" />}
+                    <p className="text-sm text-gray-300">{e.role}</p>
+                  </div>
+                  <div className="col-span-3"><p className="text-sm text-gray-300">{nomBoutique(e.boutiqueId)}</p></div>
+                  <div className="col-span-2">
+                    <span className="text-xs px-2 py-1 rounded-full font-medium bg-teal-500/10 text-teal-400">Actif</span>
+                  </div>
+                  <div className="col-span-1 flex justify-end">
+                    <button
+                      onClick={() => setEmployeASupprimer({ id: e.id, nom: e.nom })}
+                      className="text-slate-500 hover:text-red-400 transition p-1.5 rounded-lg hover:bg-red-500/10"
+                      title="Retirer cet employé"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 

@@ -12,8 +12,8 @@ function ModalPaiement({ total, onClose, onConfirm }: { total: number; onClose: 
     { id: "orange_money", label: "Orange Money", icon: CreditCard },
   ];
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm p-5 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white">Encaisser</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-gray-300"><X size={18} /></button>
@@ -74,10 +74,10 @@ export default function Ventes() {
   const ventesAujourdhui = ventes.filter((v) => new Date(v.date).toDateString() === new Date().toDateString());
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">Point de vente</h1>
-        <p className="text-sm text-slate-500 mt-1">Enregistre une vente rapidement.</p>
+        <h1 className="text-xl sm:text-2xl font-semibold text-white">Point de vente</h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">Enregistre une vente rapidement.</p>
       </div>
 
       {produits.length === 0 ? (
@@ -159,16 +159,18 @@ export default function Ventes() {
         {ventesAujourdhui.length === 0 ? (
           <p className="text-sm text-gray-500 text-center py-4">Aucune vente enregistrée aujourd'hui.</p>
         ) : (
-          <div className="space-y-1">
-            {ventesAujourdhui.map((v) => (
-              <div key={v.id} className="flex items-center gap-3 py-2.5 border-b border-slate-700 last:border-0">
-                <p className="text-xs text-gray-500 w-16">{v.id.slice(0, 6)}</p>
-                <p className="text-sm text-gray-300 flex-1">{v.lignes.length} article(s)</p>
-                <span className="text-xs px-2 py-1 rounded-full bg-slate-700 text-slate-500 capitalize">{v.mode.replace("_", " ")}</span>
-                <p className="text-xs text-gray-500 w-14">{new Date(v.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</p>
-                <p className="text-sm font-medium text-teal-400 w-24 text-right">{v.total.toLocaleString("fr-FR")} F</p>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <div className="min-w-[480px] space-y-1">
+              {ventesAujourdhui.map((v) => (
+                <div key={v.id} className="flex items-center gap-3 py-2.5 border-b border-slate-700 last:border-0">
+                  <p className="text-xs text-gray-500 w-16">{v.id.slice(0, 6)}</p>
+                  <p className="text-sm text-gray-300 flex-1">{v.lignes.length} article(s)</p>
+                  <span className="text-xs px-2 py-1 rounded-full bg-slate-700 text-slate-500 capitalize">{v.mode.replace("_", " ")}</span>
+                  <p className="text-xs text-gray-500 w-14">{new Date(v.date).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</p>
+                  <p className="text-sm font-medium text-teal-400 w-24 text-right">{v.total.toLocaleString("fr-FR")} F</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

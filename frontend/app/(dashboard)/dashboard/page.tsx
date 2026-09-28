@@ -64,13 +64,13 @@ export default function Dashboard() {
   const aucuneDonnee = produits.length === 0;
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">
+          <h1 className="text-xl sm:text-2xl font-semibold text-white">
             {profil.nomProprietaire ? `${salutation}, ${profil.nomProprietaire}` : salutation}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Voici l'état de ta boutique aujourd'hui.</p>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">Voici l'état de ta boutique aujourd'hui.</p>
         </div>
         <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 shadow-sm rounded-lg px-4 py-2.5 w-full md:w-72">
           <Search size={15} className="text-slate-500" />
@@ -79,7 +79,7 @@ export default function Dashboard() {
       </div>
 
       {aucuneDonnee ? (
-        <div className="rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-10 text-center">
+        <div className="rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-6 sm:p-10 text-center">
           <div className="w-14 h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center mx-auto mb-4">
             <Store size={24} className="text-teal-400" />
           </div>
@@ -93,7 +93,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <KpiCard icon={Package} label="Produits actifs" value={produits.length} sub="Total en catalogue" bg="bg-teal-500/10" fg="text-teal-400" />
             <KpiCard icon={Wallet} label="Valeur du stock" value={`${valeurStock.toLocaleString("fr-FR")} F`} sub="Au prix de vente" bg="bg-blue-500/10" fg="text-blue-400" />
             <KpiCard icon={AlertTriangle} label="Ruptures proches" value={enAlerte.length} sub="À réapprovisionner" bg="bg-red-500/10" fg="text-red-400" />
@@ -101,7 +101,7 @@ export default function Dashboard() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
-            <div className="lg:col-span-2 rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-6">
+            <div className="lg:col-span-2 rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-base font-semibold text-white">Bilan</h3>
                 <div className="flex bg-slate-700 rounded-full p-1">
@@ -121,7 +121,7 @@ export default function Dashboard() {
                   <p className="text-sm text-slate-500">Dépenses (coût des ventes)</p>
                   <p className="text-sm font-semibold text-red-400">-{depenses.toLocaleString("fr-FR")} F</p>
                 </div>
-                <div className="h-px bg-gray-200" />
+                <div className="h-px bg-slate-700" />
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-gray-100">Bénéfice net</p>
                   <p className="text-xl font-bold text-white">{solde.toLocaleString("fr-FR")} F</p>

@@ -24,8 +24,8 @@ function ModalMouvement({ type, onClose }: { type: "entree" | "sortie"; onClose:
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-2xl w-full max-w-md p-6 shadow-xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white">{titres[type]}</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-gray-300"><X size={18} /></button>
@@ -78,17 +78,17 @@ export default function Stock() {
   };
 
   return (
-    <div className="p-6 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Mouvements de stock</h1>
-          <p className="text-sm text-slate-500 mt-1">{totalUnites.toLocaleString("fr-FR")} unités en stock, {enAlerte} en alerte.</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-white">Mouvements de stock</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">{totalUnites.toLocaleString("fr-FR")} unités en stock, {enAlerte} en alerte.</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setModal("entree")} disabled={produits.length === 0} className="flex items-center gap-2 bg-teal-500/10 text-teal-400 px-4 py-2.5 rounded-lg text-sm font-medium disabled:opacity-40">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button onClick={() => setModal("entree")} disabled={produits.length === 0} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 px-4 py-2.5 rounded-lg text-sm font-medium transition disabled:opacity-40">
             <ArrowDownCircle size={15} /> Entrée
           </button>
-          <button onClick={() => setModal("sortie")} disabled={produits.length === 0} className="flex items-center gap-2 bg-red-500/10 text-red-400 px-4 py-2.5 rounded-lg text-sm font-medium disabled:opacity-40">
+          <button onClick={() => setModal("sortie")} disabled={produits.length === 0} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2.5 rounded-lg text-sm font-medium transition disabled:opacity-40">
             <ArrowUpCircle size={15} /> Sortie
           </button>
         </div>
@@ -130,32 +130,30 @@ export default function Stock() {
               <p className="text-sm text-gray-500">Ajoute des produits dans la section Produits d'abord.</p>
             </div>
           ) : (
-            <>
-  <div className="overflow-x-auto">
-<div className="min-w-[700px]">
-            <div className="grid grid-cols-12 px-5 py-3 border-b border-slate-700 text-xs uppercase tracking-wider text-gray-500 font-medium">
-                <div className="col-span-6">Produit</div>
-                <div className="col-span-2">Quantité</div>
-                <div className="col-span-2">Seuil</div>
-                <div className="col-span-2">Statut</div>
-              </div>
-              {stockFiltre.map((p) => (
-                <div key={p.id} className="grid grid-cols-12 items-center px-5 py-3.5 border-b border-slate-700 last:border-0 hover:bg-slate-900">
-                  <div className="col-span-6 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-slate-700 border border-slate-700 flex items-center justify-center shrink-0"><Package size={14} className="text-gray-500" /></div>
-                    <div className="min-w-0">
-                      <p className="text-sm text-white font-medium truncate">{p.nom}</p>
-                      <p className="text-xs text-gray-500">{p.sku}</p>
-                    </div>
-                  </div>
-                  <div className="col-span-2 text-sm font-medium text-white">{p.stock}</div>
-                  <div className="col-span-2 text-sm text-gray-500">{p.seuil}</div>
-                  <div className="col-span-2"><StatutStock stock={p.stock} seuil={p.seuil} /></div>
+            <div className="overflow-x-auto">
+              <div className="min-w-[700px]">
+                <div className="grid grid-cols-12 px-5 py-3 border-b border-slate-700 text-xs uppercase tracking-wider text-gray-500 font-medium">
+                  <div className="col-span-6">Produit</div>
+                  <div className="col-span-2">Quantité</div>
+                  <div className="col-span-2">Seuil</div>
+                  <div className="col-span-2">Statut</div>
                 </div>
-              ))}
-            </>
-</div>
-</div>
+                {stockFiltre.map((p) => (
+                  <div key={p.id} className="grid grid-cols-12 items-center px-5 py-3.5 border-b border-slate-700 last:border-0 hover:bg-slate-900">
+                    <div className="col-span-6 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-slate-700 border border-slate-700 flex items-center justify-center shrink-0"><Package size={14} className="text-gray-500" /></div>
+                      <div className="min-w-0">
+                        <p className="text-sm text-white font-medium truncate">{p.nom}</p>
+                        <p className="text-xs text-gray-500">{p.sku}</p>
+                      </div>
+                    </div>
+                    <div className="col-span-2 text-sm font-medium text-white">{p.stock}</div>
+                    <div className="col-span-2 text-sm text-gray-500">{p.seuil}</div>
+                    <div className="col-span-2"><StatutStock stock={p.stock} seuil={p.seuil} /></div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 

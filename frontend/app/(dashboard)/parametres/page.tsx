@@ -74,24 +74,24 @@ export default function Parametres() {
   }
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">Paramètres</h1>
-        <p className="text-sm text-slate-500 mt-1">Gère ta boutique, ton compte et ton abonnement.</p>
+        <h1 className="text-xl sm:text-2xl font-semibold text-white">Paramètres</h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">Gère ta boutique, ton compte et ton abonnement.</p>
       </div>
 
       {!profil.nomProprietaire && (
         <div className="rounded-xl bg-teal-500/10 border border-teal-500/40 p-4 mb-6">
-          <p className="text-sm text-teal-800 font-medium">Complète ton profil pour personnaliser ton tableau de bord.</p>
+          <p className="text-sm text-teal-300 font-medium">Complète ton profil pour personnaliser ton tableau de bord.</p>
           <p className="text-xs text-teal-400 mt-1">Renseigne ton nom dans l'onglet "Mon compte" ci-dessous.</p>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
-          <div className="rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-2">
+          <div className="flex lg:flex-col overflow-x-auto gap-1 rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-1.5 sm:p-2">
             {onglets.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => setOngletActif(id)} className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm transition ${
+              <button key={id} onClick={() => setOngletActif(id)} className={`flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-2.5 px-3.5 py-2.5 rounded-lg text-sm whitespace-nowrap transition ${
                 ongletActif === id ? "bg-teal-500/10 text-teal-400 font-medium" : "text-slate-500 hover:text-white"
               }`}>
                 <Icon size={16} /> {label}
@@ -100,7 +100,7 @@ export default function Parametres() {
           </div>
         </div>
 
-        <div className="lg:col-span-3 rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-6">
+        <div className="lg:col-span-3 rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-5 sm:p-6">
           {ongletActif === "general" && (
             <div className="space-y-4 max-w-md">
               <h3 className="text-base font-semibold text-white mb-4">Informations de la boutique</h3>

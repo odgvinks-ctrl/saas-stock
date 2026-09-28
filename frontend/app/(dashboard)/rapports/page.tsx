@@ -60,13 +60,13 @@ export default function Rapports() {
   const aucuneVente = ventesPeriode.length === 0;
 
   return (
-    <div className="p-6 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Rapports</h1>
-          <p className="text-sm text-slate-500 mt-1">Bénéfices, pertes et performance de ta boutique.</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-white">Rapports</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">Bénéfices, pertes et performance de ta boutique.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex bg-slate-700 rounded-full p-1">
             {(["semaine", "mois"] as const).map((p) => (
               <button key={p} onClick={() => setPeriode(p)} className={`px-4 py-1.5 rounded-full text-xs font-medium capitalize transition ${
@@ -81,7 +81,7 @@ export default function Rapports() {
       </div>
 
       {aucuneVente ? (
-        <div className="rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-10 text-center">
+        <div className="rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-6 sm:p-10 text-center">
           <div className="w-14 h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center mx-auto mb-4">
             <BarChart3 size={24} className="text-teal-400" />
           </div>
@@ -92,8 +92,8 @@ export default function Rapports() {
         </div>
       ) : (
         <>
-          <div className="rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <div className="rounded-xl bg-slate-800 border border-slate-700 shadow-sm p-5 sm:p-6 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div>
                 <p className="text-xs text-slate-500 mb-1">Recettes</p>
                 <p className="text-2xl font-semibold text-teal-400">+{recettes.toLocaleString("fr-FR")} F</p>

@@ -16,8 +16,8 @@ function ModalNouvelleBoutique({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-      <div className="bg-slate-800 rounded-2xl w-full max-w-md p-6 shadow-xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white">Nouvelle boutique</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-gray-300"><X size={18} /></button>
@@ -48,13 +48,13 @@ export default function Boutiques() {
   const [modal, setModal] = useState(false);
 
   return (
-    <div className="p-6 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Boutiques</h1>
-          <p className="text-sm text-slate-500 mt-1">{boutiques.length} point(s) de vente enregistré(s).</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-white">Boutiques</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">{boutiques.length} point(s) de vente enregistré(s).</p>
         </div>
-        <button onClick={() => setModal(true)} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium">
+        <button onClick={() => setModal(true)} className="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium w-full sm:w-auto transition">
           <Plus size={16} /> Nouvelle boutique
         </button>
       </div>

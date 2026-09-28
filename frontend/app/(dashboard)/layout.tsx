@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Package, Boxes, ShoppingCart, Store,
   Users, BarChart3, Settings, LogOut, Bell, Clock, Menu, X
@@ -170,10 +169,24 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 shrink-0 bg-slate-800 border-b border-slate-700 flex items-center justify-between md:justify-end gap-3 px-4 md:px-6">
-          <button onClick={() => setMenuOuvert(true)} className="md:hidden text-gray-300 p-2 -ml-2">
-            <Menu size={20} />
-          </button>
+        <header className="sticky top-0 z-30 h-16 shrink-0 bg-slate-800/95 backdrop-blur border-b border-slate-700 flex items-center justify-between md:justify-end gap-3 px-4 md:px-6">
+          <div className="flex items-center gap-2.5 md:hidden">
+            <button
+              onClick={() => setMenuOuvert(true)}
+              className="text-gray-300 p-2 -ml-2 rounded-lg hover:bg-slate-700 transition"
+              aria-label="Ouvrir le menu"
+            >
+              <Menu size={20} />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-teal-600 flex items-center justify-center shrink-0">
+                <Package size={14} className="text-white" />
+              </div>
+              <span className="text-white text-sm font-semibold truncate max-w-[140px] sm:max-w-[200px]">
+                {profil.nomBoutiquePrincipale || "StockFlow"}
+              </span>
+            </div>
+          </div>
           <div className="flex items-center gap-3">
             <DecompteAbonnement />
             <button className="relative w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center shrink-0">
