@@ -200,6 +200,8 @@ export default function Produits() {
           </div>
         ) : (
           <>
+<div className="overflow-x-auto">
+<div className="min-w-[700px]">
             <div className="grid grid-cols-12 px-6 py-3 border-b border-slate-700 text-xs uppercase tracking-wider text-gray-500 font-medium">
               <div className="col-span-4">Produit</div>
               <div className="col-span-2">Prix achat</div>
@@ -241,6 +243,8 @@ export default function Produits() {
             })}
           </>
         )}
+</div>
+</div>
       </div>
 
       {modalOuvert && <ModalNouveauProduit onClose={() => setModalOuvert(false)} />}

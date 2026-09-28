@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Package, Boxes, ShoppingCart, Store,
-  Users, BarChart3, Settings, LogOut, Bell, Clock
+  Users, BarChart3, Settings, LogOut, Bell, Clock, Menu, X
 } from "lucide-react";
 import { BoutiqueProvider, useBoutique } from "@/lib/store/boutique-store";
 import { creerClientSupabase } from "@/lib/supabase/client";
@@ -80,6 +81,11 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { profil } = useBoutique();
+  const [menuOuvert, setMenuOuvert] = useState(false);
+
+  useEffect(() => {
+    setMenuOuvert(false);
+  }, [pathname]);
   const nomAffiche = profil.nomProprietaire || "Compléter mon profil";
   const initiale = profil.nomProprietaire ? profil.nomProprietaire.charAt(0).toUpperCase() : "?";
 
@@ -94,17 +100,34 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-slate-950" style={{ fontFamily: "Inter, sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');`}</style>
 
-      <aside className="w-64 shrink-0 bg-[#0F172A] flex flex-col p-4">
-        <div className="flex items-center gap-2.5 mb-8 px-2 pt-2">
-          <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center">
-            <Package size={18} className="text-white" />
+      {/* Fond sombre derrière le menu quand il est ouvert sur mobile */}
+      {menuOuvert && (
+        <div
+          onClick={() => setMenuOuvert(false)}
+          className="fixed inset-0 bg-black/60 z-40 md:hidden"
+        />
+      )}
+
+      <aside
+        className={`w-64 shrink-0 bg-[#0F172A] flex flex-col p-4 fixed inset-y-0 left-0 z-50 transition-transform duration-200 md:static md:translate-x-0 ${
+          menuOuvert ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between mb-8 px-2 pt-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center">
+              <Package size={18} className="text-white" />
+            </div>
+            <div>
+              <p className="text-white text-sm font-semibold leading-none">
+                {profil.nomBoutiquePrincipale || "StockFlow"}
+              </p>
+              <p className="text-[11px] text-white/45 mt-1">Gestion de stock</p>
+            </div>
           </div>
-          <div>
-            <p className="text-white text-sm font-semibold leading-none">
-              {profil.nomBoutiquePrincipale || "StockFlow"}
-            </p>
-            <p className="text-[11px] text-white/45 mt-1">Gestion de stock</p>
-          </div>
+          <button onClick={() => setMenuOuvert(false)} className="md:hidden text-white/50 hover:text-white p-1">
+            <X size={18} />
+          </button>
         </div>
 
         <nav className="flex-1 space-y-1">
@@ -114,6 +137,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
               <Link
                 key={href}
                 href={href}
+                onClick={() => setMenuOuvert(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                   isActive ? "bg-teal-600 text-white font-medium" : "text-white/55 hover:text-white hover:bg-white/10"
                 }`}
@@ -146,11 +170,16 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 shrink-0 bg-slate-800 border-b border-slate-700 flex items-center justify-end gap-3 px-6">
-          <DecompteAbonnement />
-          <button className="relative w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center">
-            <Bell size={16} className="text-gray-300" />
+        <header className="h-16 shrink-0 bg-slate-800 border-b border-slate-700 flex items-center justify-between md:justify-end gap-3 px-4 md:px-6">
+          <button onClick={() => setMenuOuvert(true)} className="md:hidden text-gray-300 p-2 -ml-2">
+            <Menu size={20} />
           </button>
+          <div className="flex items-center gap-3">
+            <DecompteAbonnement />
+            <button className="relative w-9 h-9 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center shrink-0">
+              <Bell size={16} className="text-gray-300" />
+            </button>
+          </div>
         </header>
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>

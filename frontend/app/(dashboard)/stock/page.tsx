@@ -131,7 +131,9 @@ export default function Stock() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-12 px-5 py-3 border-b border-slate-700 text-xs uppercase tracking-wider text-gray-500 font-medium">
+  <div className="overflow-x-auto">
+<div className="min-w-[700px]">
+            <div className="grid grid-cols-12 px-5 py-3 border-b border-slate-700 text-xs uppercase tracking-wider text-gray-500 font-medium">
                 <div className="col-span-6">Produit</div>
                 <div className="col-span-2">Quantité</div>
                 <div className="col-span-2">Seuil</div>
@@ -152,6 +154,8 @@ export default function Stock() {
                 </div>
               ))}
             </>
+</div>
+</div>
           )}
         </div>
 
